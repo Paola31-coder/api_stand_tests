@@ -2,28 +2,49 @@ import configuration
 import requests
 import data
 
+def get_docs():
+    return requests.get(configuration.URL_SERVICE + configuration.DOC_PATH)
 
-def test_create_user_2_letter_in_first_name_get_success_response():
-    # La versión actualizada del cuerpo de solicitud que contiene el nombre "Aa" se guarda en la variable "user_body"
-    user_body = get_user_body("Aa")
-    # El resultado de la solicitud relevante se guarda en la variable "user_response"
-    user_response = sender_stand_request.post_new_user(user_body)
+response = get_docs()
+print(response.status_code)
 
-    # Comprueba si el código de estado es 201
-    assert user_response.status_code == 201
-    # Comprueba que el campo authToken está en la respuesta y contiene un valor
-    assert user_response.json()["authToken"] != ""
 
-    # El resultado de la solicitud de recepción de datos de la tabla "user_model" se guarda en la variable "users_table_response"
-    users_table_response = sender_stand_request.get_users_table()
-    # El string que debe estar en el cuerpo de la respuesta para recibir datos de la tabla "users" se ve así
-    str_user = user_body["firstName"] + "," + user_body["phone"] + "," \
-               + user_body["address"] + ",,," + user_response.json()["authToken"]
 
-    # Comprueba si el usuario o usuaria existe y es único/a
-    assert users_table_response.text.count(str_user) == 1
+def get_logs():
+    return requests.get(configuration.URL_SERVICE + configuration.LOG_MAIN_PATH,
+                        params={"count": 20})
 
-test_create_user_15_letter_in_first_name_get_success_response()
+response = get_logs()
+print(response.status_code)
+print(response.headers)
 
+
+def get_users_table():
+    return requests.get(configuration.URL_SERVICE + configuration.USERS_TABLE_PATH)
+
+response = get_users_table()
+print(response.status_code)
+
+
+def post_new_user(body):
+    return requests.post(configuration.URL_SERVICE + configuration.CREATE_USER_PATH,  # inserta la dirección URL completa
+                         json=body,  # inserta el cuerpo de solicitud
+                         headers=data.headers)  # inserta los encabezados
+
+response = post_new_user(data.user_body)
+print(response.status_code)
+print(response.json())
+
+
+def post_products_kits(products_ids):
+    # Realiza una solicitud POST para buscar kits por productos.
+    return requests.post(configuration.URL_SERVICE + configuration.PRODUCTS_KITS_PATH, # Concatenación de URL base y ruta.
+                         json=products_ids, # Datos a enviar en la solicitud.
+                         headers=data.headers) # Encabezados de solicitud.
+
+
+response = post_products_kits(data.product_ids);
+print(response.status_code)
+print(response.json()) # Muestra del resultado en la consola
 
 
